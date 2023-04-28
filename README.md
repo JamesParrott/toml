@@ -19,7 +19,6 @@ moved away towards [tomlkit](https://github.com/sdispater/tomlkit) or [tomli-w](
 Please do submit bug reports for any issues you find.  Reading TOML is now natively supported in Python 3.11 [^1], but the 
 Python eco-system still needs a great TOML writer.
 
-
 ## Installation
 
     pip install toml-tools
