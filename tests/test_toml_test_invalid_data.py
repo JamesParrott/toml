@@ -11,7 +11,7 @@ import toml_tools
 from . import decoding_test
 
 # Hardcoded absolute path to run Iron Python tests from \src\
-TOML_TEST_DIR = r"C:\Users\James\Documents\Coding\repos\toml-test-master\toml-test-master\tests"
+TOML_TEST_DIR = r"C:\Users\James\Documents\Coding\repos\toml-test-master\toml-test-1.0.0\tests"
 
 
 def test_invalid_tests():
