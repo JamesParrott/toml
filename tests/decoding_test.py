@@ -25,6 +25,7 @@ def tag(value):
             d[k] = tag(v)
         return d
     elif isinstance(value, list):
+        return [tag(v) for v in value]
         a = []
         for v in value:
             a.append(tag(v))

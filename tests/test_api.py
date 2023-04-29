@@ -35,8 +35,8 @@ def make_bug_148_test_function(toml_module):
 
 test_bug_148_toml_tools = make_bug_148_test_function(toml_tools)
 
-@pytest.skip()
-# @pytest.mark.skipif(sys.version_info >= (3,), reason = 'Python 2 only test')
+# @pytest.skip()
+@pytest.mark.skipif(sys.version_info >= (3,), reason = 'Python 2 only test')
 def test_bug_144():
 
     bug_dict = {'username': '\xd7\xa9\xd7\x9c\xd7\x95\xd7\x9d'}
@@ -77,12 +77,13 @@ def make_parses_correctly_test(toml_path):
         with open(toml_path,'rt') as toml_fh, open(json_path,'rt') as json_fh:
             dict_ = toml_tools.load(toml_fh)
             tagged = decoding_test.tag(dict_)
-            jsoned = json.dumps(tagged)
-            expected = json_fh.read()
-            assert jsoned == expected
+            # jsoned = json.dumps(tagged)
+            expected = json.load(json_fh) #json_fh.read()
+            assert tagged == expected
+    return test_parses_toml_to_tagged_json_from
 
 
-TOML_GLOB = os.path.join(TOML_TEST_DIR,"valid", '*.toml')
+TOML_GLOB = os.path.join(TOML_TEST_DIR,"valid", '**\*.toml')
 for file_path in glob.iglob(TOML_GLOB):
     test_name = os.path.splitext(os.path.basename(file_path))[0]
     test_func_name = 'test_toml_test_valid_%s' % test_name
@@ -140,7 +141,7 @@ def test_array_sep():
     o = toml_tools.loads(toml_tools.dumps(d, encoder=encoder))
     assert o == toml_tools.loads(toml_tools.dumps(o, encoder=encoder))
 
-@pytest.skip()
+# @pytest.skip()
 def test_numpy_floats():
     np = pytest.importorskip('numpy')
 
@@ -157,7 +158,7 @@ def test_numpy_floats():
     o = toml_tools.loads(toml_tools.dumps(d, encoder=encoder))
     assert o == toml_tools.loads(toml_tools.dumps(o, encoder=encoder))
 
-@pytest.skip()
+# @pytest.skip()
 def test_numpy_ints():
     np = pytest.importorskip('numpy')
 
@@ -250,30 +251,33 @@ def test_dump():
     assert g.written == h.written
 
 
+TEST_DOT_TOML_PATH = os.path.join(os.path.dirname(__file__), "test.toml")
+
+
 def test_paths():
-    toml_tools.load(os.path.join(os.path.dirname(__file__), "test.toml"))
-    toml_tools.load(os.path.join(os.path.dirname(__file__), b"test.toml"))
+    toml_tools.load(TEST_DOT_TOML_PATH)
+    toml_tools.load(os.path.join(bytes(os.path.dirname(__file__),'utf8'), b"test.toml"))
     import sys
-    if (3, 4) <= sys.version_info:
+    if sys.version_info >= (3, 4):
         import pathlib
-        p = pathlib.Path("test.toml")
+        p = pathlib.Path(TEST_DOT_TOML_PATH)
         toml_tools.load(p)
         
 
-@pytest.skip()
+# @pytest.skip()
 def test_warnings():
     # Expect 1 warning for the non existent toml file
     with pytest.warns(UserWarning):
-        toml_tools.load(["test.toml", "nonexist.toml"])
+        toml_tools.load([os.path.join(os.path.dirname(__file__),"test.toml"), "nonexist.toml"])
 
 
 def test_commutativity():
     o = toml_tools.loads(toml_tools.dumps(TEST_DICT))
     assert o == toml_tools.loads(toml_tools.dumps(o))
 
-@pytest.skip()
-# @pytest.mark.skipif(sys.platform == 'win32', 
-#                     reason = 'Hardcoded POSIX file path from /uiri/toml')
+# @pytest.skip()
+@pytest.mark.skipif(sys.platform == 'win32', 
+                    reason = 'Hardcoded POSIX file path from /uiri/toml')
 def test_pathlib():
     if (3, 4) <= sys.version_info:
         import pathlib
