@@ -1,12 +1,16 @@
-import toml_tools
 import copy
-import pytest
 import os
 import sys
+import json
+import glob
 from decimal import Decimal
 
+import pytest
+
+import toml_tools
 from toml_tools.decoder import InlineTableDict
 
+from . import decoding_test
 
 
 TEST_STR = """
@@ -51,17 +55,41 @@ def test_bug_196():
     assert round_trip_bug_dict == bug_dict
     assert round_trip_bug_dict['x'] == bug_dict['x']
 
-
+# Hardcoded absolute path to run Iron Python tests from \src\
 TOML_TEST_DIR = r"C:\Users\James\Documents\Coding\repos\toml-test-master\toml-test-master\tests"
 
+VALID_DIR = os.path.join(TOML_TEST_DIR,"valid")
 
 def test_valid_tests():
-    valid_dir = os.path.join(TOML_TEST_DIR,"valid")
-    for f in os.listdir(valid_dir):
+    for f in os.listdir(VALID_DIR):
         if not f.endswith("toml"):
             continue
-        with open(os.path.join(valid_dir, f)) as fh:
+        with open(os.path.join(VALID_DIR, f)) as fh:
             toml_tools.dumps(toml_tools.load(fh))
+
+def make_parses_correctly_test(toml_path):
+    def test_parses_toml_to_tagged_json_from():
+        json_path = os.path.splitext(toml_path)[0] + '.json'
+
+        if not os.path.exists(json_path):
+            raise FileExistsError('No json test file for toml file: %s' % toml_path)
+        
+        with open(toml_path,'rt') as toml_fh, open(json_path,'rt') as json_fh:
+            dict_ = toml_tools.load(toml_fh)
+            tagged = decoding_test.tag(dict_)
+            jsoned = json.dumps(tagged)
+            expected = json_fh.read()
+            assert jsoned == expected
+
+
+TOML_GLOB = os.path.join(TOML_TEST_DIR,"valid", '*.toml')
+for file_path in glob.iglob(TOML_GLOB):
+    test_name = os.path.splitext(os.path.basename(file_path))[0]
+    test_func_name = 'test_toml_test_valid_%s' % test_name
+
+    # It would be cleaner to setattr these test functions as class methods, 
+    # but ironpython-pytest doesn't look for class methods as yet.
+    globals()[test_func_name] = make_parses_correctly_test(file_path)
 
 
 def test_circular_ref():
